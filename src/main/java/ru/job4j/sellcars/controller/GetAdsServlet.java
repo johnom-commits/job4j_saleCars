@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
+import java.util.Map;
 
 @WebServlet("/ads.do")
 public class GetAdsServlet extends HttpServlet {
@@ -18,9 +18,9 @@ public class GetAdsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html");
         resp.setCharacterEncoding("UTF-8");
-        var writer = new PrintWriter(resp.getOutputStream(), true, Charset.defaultCharset());
+        var writer = new PrintWriter(resp.getOutputStream(), true);
         User user = (User) req.getSession().getAttribute("user");
-        String ads = TextHTML.ads(user);
-        writer.println(ads);
+        Map<String, String[]> map = req.getParameterMap();
+        writer.println(TextHTML.ads(user, map));
     }
 }

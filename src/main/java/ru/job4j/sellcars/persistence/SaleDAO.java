@@ -7,6 +7,7 @@ import ru.job4j.sellcars.domain.User;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface SaleDAO {
@@ -16,7 +17,7 @@ public interface SaleDAO {
 
     void add(int brandId, int modelId, String town, Calendar calendar, String photo, User user, double parseDouble);
 
-    List<Car> getCars();
+    List<Car> getCars(Map<String, String[]> param);
 
     <T> void create(final T model);
 

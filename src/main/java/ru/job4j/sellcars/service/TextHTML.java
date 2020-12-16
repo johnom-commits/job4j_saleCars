@@ -13,7 +13,7 @@ import java.util.*;
 public class TextHTML {
 
     public static String brands() {
-        var select = new StringBuilder("<option selected>Choose your car brand</option>");
+        var select = new StringBuilder("<option value=-1 selected>Choose brand</option>");
         for (Brand b : Store.insOf().getBrands()) {
             select.append("<option value=")
                     .append(b.getId())
@@ -36,10 +36,11 @@ public class TextHTML {
         return select.toString();
     }
 
-    public static String ads(User user) {
+    public static String ads(User user, Map<String, String[]> param) {
         Map<String, String> map = new HashMap<>();
-        map.put("ads", htmlAds(Store.insOf().getCars()));
+        map.put("ads", htmlAds(Store.insOf().getCars(param)));
         map.put("login", htmlLogin(user));
+        map.put("brands", brands());
         return new JSONObject(map).toJSONString();
     }
 

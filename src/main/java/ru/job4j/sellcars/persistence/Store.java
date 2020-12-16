@@ -8,14 +8,15 @@ import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.query.Query;
 import ru.job4j.sellcars.domain.Brand;
 import ru.job4j.sellcars.domain.Car;
 import ru.job4j.sellcars.domain.Model;
 import ru.job4j.sellcars.domain.User;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.function.Function;
 
 public class Store implements SaleDAO, AutoCloseable {
@@ -36,6 +37,7 @@ public class Store implements SaleDAO, AutoCloseable {
 
         private static final Store INSTANCE = new Store();
     }
+
     public static Store insOf() {
         return Lazy.INSTANCE;
     }
@@ -93,8 +95,37 @@ public class Store implements SaleDAO, AutoCloseable {
                 .getResultStream().findFirst());
     }
 
-    public List<Car> getCars() {
-        return tx(session -> session.createQuery("select c from Car as c where c.sold = false", Car.class).list());
+    public List<Car> getCars(Map<String, String[]> param) {
+        return tx(session -> {
+            String textQuery = "select c from Car as c where c.sold = false";
+
+            boolean hasPhoto = Boolean.parseBoolean(param.get("photo")[0]);
+            if (hasPhoto) {
+                textQuery += " and c.photo != null";
+            }
+
+            boolean lastDay = Boolean.parseBoolean(param.get("last_day")[0]);
+            if (lastDay) {
+                textQuery += " and c.created >= :now";
+            }
+
+            Brand brand = null;
+            int brand_id = Integer.parseInt(param.get("brand_id")[0]);
+            if (brand_id > -1) {
+                brand = session.getReference(Brand.class, brand_id);
+                textQuery += " and c.brand = :brand";
+            }
+
+            Query<Car> query = session.createQuery(textQuery, Car.class);
+            if (brand_id > -1) {
+                query.setParameter("brand", brand);
+            }
+            if (lastDay) {
+                Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                query.setParameter("now", date);
+            }
+            return query.list();
+        });
     }
 
     public Optional<Car> getCarById(long id) {
