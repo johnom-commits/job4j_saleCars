@@ -40,4 +40,4 @@
 ![veiw](images/veiw.png)
 
 #### Схема базы данных
-![Schema](images/SchemaDB.png)
+![Schema](images/SchemeDB.png)
